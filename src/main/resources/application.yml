@@ -1,0 +1,55 @@
+server:
+  address: ${CRYPTO_BIND_ADDRESS:127.0.0.1}
+  port: ${CRYPTO_PORT:8080}
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: crypto-trading-agents
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${CRYPTO_DB_URL:jdbc:postgresql://localhost:5432/crypto_agents}
+    username: ${CRYPTO_DB_USER:crypto_agents}
+    password: ${CRYPTO_DB_PASSWORD:crypto_agents_local}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  ai:
+    model:
+      chat: ollama
+      embedding: ollama
+    ollama:
+      base-url: ${CRYPTO_OLLAMA_URL:http://localhost:11434}
+      init:
+        pull-model-strategy: never
+      chat:
+        options:
+          model: ${CRYPTO_OLLAMA_MODEL:qwen2.5:7b}
+          temperature: 0.2
+      embedding:
+        options:
+          model: ${CRYPTO_EMBEDDING_MODEL:nomic-embed-text}
+    vectorstore:
+      type: ${CRYPTO_VECTOR_STORE:pgvector}
+      pgvector:
+        dimensions: ${CRYPTO_EMBEDDING_DIMENSIONS:768}
+        index-type: hnsw
+        distance-type: cosine_distance
+        initialize-schema: true
+
+crypto:
+  market:
+    base-url: ${CRYPTO_MARKET_URL:https://data-api.binance.vision}
+    pairs: ${CRYPTO_PAIRS:BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT,DOGEUSDT}
+  reflection:
+    cron: ${CRYPTO_REFLECTION_CRON:0 0 1 * * *}
+  news:
+    coindesk-url: ${CRYPTO_NEWS_COINDESK_URL:https://www.coindesk.com/arc/outboundfeeds/rss/?outputType=xml}
+    fed-url: ${CRYPTO_NEWS_FED_URL:https://www.federalreserve.gov/feeds/press_monetary.xml}
+    cointelegraph-url: ${CRYPTO_NEWS_COINTELEGRAPH_URL:https://cointelegraph.com/rss}
+    ethereum-url: ${CRYPTO_NEWS_ETHEREUM_URL:https://blog.ethereum.org/en/feed.xml}
+    sec-url: ${CRYPTO_NEWS_SEC_URL:https://www.sec.gov/news/pressreleases.rss}
